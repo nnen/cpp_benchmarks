@@ -31,8 +31,10 @@ FetchContent_MakeAvailable(googlebenchmark)
 FetchContent_GetProperties(benchmark SOURCE_DIR BENCHMARK_INCLUDE_DIR)
 include_directories(${BENCHMARK_INCLUDE_DIR})
 
+add_subdirectory("cpp_benchmark_common")
 add_subdirectory("modulo_vs_addif")
 add_subdirectory("cache_friendliness")
+add_subdirectory("data_oriented")
 
 #execute_process(
 #    COMMAND ${CMAKE_COMMAND} -E copy_if_different

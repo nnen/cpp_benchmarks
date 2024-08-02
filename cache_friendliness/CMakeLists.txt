@@ -11,6 +11,7 @@ target_include_directories (cache_friendliness PUBLIC ${CMAKE_CURRENT_SOURCE_DIR
 
 target_link_libraries(
     cache_friendliness 
+    cpp_benchmark_common
     benchmark::benchmark
 )
 
