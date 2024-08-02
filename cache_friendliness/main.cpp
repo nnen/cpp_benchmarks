@@ -1,5 +1,7 @@
 #include <benchmark/benchmark.h>
 
+#include <cpp_benchmark_common/cpp_benchmark_common.h>
+
 #include <cstdint>
 #include <algorithm>
 #include <memory>
@@ -17,42 +19,28 @@ void InitSequence(T begin, T end)
 }
 
 
-void TryClearingCache()
-{
-   constexpr size_t biggerThanCacheSize = 10 * 1024 * 1024;
-   long* bigArray = new long[biggerThanCacheSize];
-
-   for (size_t i = 0; i < biggerThanCacheSize; ++i)
-   {
-      //bigArray[i] = rand();
-      bigArray[i] = 0;
-   }
-
-   delete[] bigArray;
-}
-
-
 void BM_sort_array(benchmark::State& state)
 {
-   constexpr std::size_t size = 1024;
-   std::uint32_t array[size];
+   volatile std::size_t size = state.range(0);
+
+   uint32_t* array = new uint32_t[size];
 
    InitSequence(array, array + size);
 
    for (auto _ : state)
    {
-      state.PauseTiming();
-      TryClearingCache();
-      state.ResumeTiming();
+      TryClearingCache(state);
 
       std::sort(array, array + size);
    }
+   
+   delete[] array;
 }
 
 
 void BM_sort_vector(benchmark::State& state)
 {
-   constexpr std::size_t size = 1024;
+   volatile std::size_t size = state.range(0);
 
    std::vector<uint32_t> vector;
    vector.resize(size);
@@ -60,9 +48,7 @@ void BM_sort_vector(benchmark::State& state)
 
    for (auto _ : state)
    {
-      state.PauseTiming();
-      TryClearingCache();
-      state.ResumeTiming();
+      TryClearingCache(state);
 
       std::sort(vector.begin(), vector.end());
    }
@@ -85,10 +71,10 @@ struct ValueOnHeap : public std::enable_shared_from_this<ValueOnHeap>
 
 void BM_sort_values_on_heap(benchmark::State& state)
 {
-   constexpr std::size_t size = 1024;
+   volatile std::size_t size = state.range(0);
 
    using Ptr = std::shared_ptr<ValueOnHeap>;
-   Ptr array[size];
+   Ptr* array = new Ptr[size];
 
    for (size_t i = 0; i < size; ++i)
    {
@@ -98,18 +84,22 @@ void BM_sort_values_on_heap(benchmark::State& state)
 
    for (auto _ : state)
    {
-      state.PauseTiming();
-      TryClearingCache();
-      state.ResumeTiming();
+      TryClearingCache(state);
 
       std::sort(array, array + size, ValueOnHeap::LessThan());
    }
+
+   delete[] array;
 }
 
 
-BENCHMARK(BM_sort_array)->Iterations(100);
-BENCHMARK(BM_sort_vector)->Iterations(100);
-BENCHMARK(BM_sort_values_on_heap)->Iterations(100);
+#define MY_BENCHMARK(name_) \
+   BENCHMARK(name_)->Unit(benchmark::kMillisecond)->Iterations(100)->Range(1024, 1024 << 12);
+
+
+MY_BENCHMARK(BM_sort_array);
+MY_BENCHMARK(BM_sort_vector);
+MY_BENCHMARK(BM_sort_values_on_heap);
 
 
 BENCHMARK_MAIN();
