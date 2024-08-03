@@ -214,6 +214,7 @@ constexpr benchmark::TimeUnit BenchmarkTimeUnit = benchmark::kMillisecond;
    ->Arg(1000000) \
    ->Arg(10000000) \
    ->Arg(20000000) \
+   ->Arg(40000000) \
    ->Iterations(NumIterations)
 
 #define MY_BENCHMARK_BOTH(name_) \
