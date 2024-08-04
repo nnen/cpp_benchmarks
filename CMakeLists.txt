@@ -35,6 +35,7 @@ add_subdirectory("cpp_benchmark_common")
 add_subdirectory("modulo_vs_addif")
 add_subdirectory("cache_friendliness")
 add_subdirectory("data_oriented")
+add_subdirectory("data_oriented2")
 
 #execute_process(
 #    COMMAND ${CMAKE_COMMAND} -E copy_if_different
